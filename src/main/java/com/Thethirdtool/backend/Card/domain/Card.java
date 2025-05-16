@@ -1,6 +1,8 @@
 package com.Thethirdtool.backend.Card.domain;
 
 
+import com.Thethirdtool.backend.Deck.domain.Deck;
+import com.Thethirdtool.backend.Note.domain.Note;
 import com.Thethirdtool.backend.common.jpa.AuditingField;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -23,6 +25,10 @@ public class Card extends AuditingField {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "note_id")
     private Note note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deck_id")
+    private Deck deck;
 
 
 }

@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -46,6 +49,12 @@ public class Card extends AuditingField {
 
     @Enumerated(EnumType.STRING)
     private DuePeriod duePeriod;
+
+    //카드 썸네일 관련 태그
+    @ElementCollection
+    @CollectionTable(name = "card_tags", joinColumns = @JoinColumn(name = "card_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
 
 
     // ====== 학습 로직 ======
@@ -135,6 +144,14 @@ public class Card extends AuditingField {
     // 유지하기 (dueDate를 그대로 유지)- permanent에 그대로 잇기
     public void keepCurrentDue() {
         // 아무 작업도 하지 않음
+    }
+
+    // 범위 안에 있는 카드냐 ->> 로직 선택
+    public boolean isInDueRangeByCreatedAt(int min, int max) {
+        if (this.getCreatedAt() == null || this.dueDate == null) return false;
+
+        long diffDays = ChronoUnit.DAYS.between(this.getCreatedAt(), this.dueDate);
+        return !isArchived && diffDays > min && diffDays <= max;
     }
 
 

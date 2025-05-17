@@ -1,6 +1,7 @@
 package com.Thethirdtool.backend.Deck.domain;
 
 import com.Thethirdtool.backend.Card.domain.Card;
+import com.Thethirdtool.backend.Card.domain.DuePeriod;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,16 @@ public class Deck {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Deck> children = new ArrayList<>();
+
+    public List<Card> getCardsByDuePeriod(DuePeriod period) {
+        List<Card> result = new ArrayList<>();
+        for (Card card : cards) {
+            if (card.getDuePeriod() == period) {
+                result.add(card);
+            }
+        }
+        return result;
+    }
 
 
     public boolean isRoot() {

@@ -19,16 +19,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class DeckService {
-
     private final DeckRepository deckRepository;
     private final CardRepository cardRepository;
-
 
     // 최상위 덱 리스트 (3day 프로젝트)
     public List<Deck> getRootDecks() {
         return deckRepository.findByParentIsNull();
     }
-
 
     // ✅ isFrozen = false인 덱의 카드만 가져오기 (3day용)
     public List<Card> getCardsFor3DayProject(Long deckId) {
@@ -42,7 +39,6 @@ public class DeckService {
 
         return cardRepository.findByDeckIdAndIsArchivedFalseAndIntervalDaysLessThanEqual(deckId, 30);
     }
-
 
     // ✅ 영구 프로젝트용 카드 조회: 하위 덱 중 얼리지 않은 것만 순회
     public List<Card> getArchivedCardsFromDeckTree(Long rootDeckId) {
@@ -60,7 +56,6 @@ public class DeckService {
 
         return result;
     }
-
 
     /**
      * 덱의 직접적인 children 덱 리스트만 반환 (➕ 버튼 클릭 시)
@@ -89,8 +84,6 @@ public class DeckService {
                                   .orElseThrow(() -> new IllegalArgumentException("Deck not found"));
         deck.unfreeze();
     }
-
-
     //하위 덱 만들기
     @Transactional
     public Deck createChildDeck(Long parentId, String name) {
@@ -105,8 +98,6 @@ public class DeckService {
 
         return deckRepository.save(child);
     }
-
-
 
 
     // ✅ 얼린 덱은 탐색 대상에서 제외->>> 이거는 사상으로는 무조건 도메인에서 처리해야함
@@ -125,6 +116,4 @@ public class DeckService {
 
         return result;
     }
-
-
 }

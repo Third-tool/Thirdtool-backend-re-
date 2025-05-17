@@ -2,7 +2,9 @@ package com.Thethirdtool.backend.Deck.presentation;
 
 
 import com.Thethirdtool.backend.Card.application.CardService;
+import com.Thethirdtool.backend.Card.domain.Card;
 import com.Thethirdtool.backend.Card.dto.response.ApiResponse;
+import com.Thethirdtool.backend.Card.dto.response.CardResponse;
 import com.Thethirdtool.backend.Deck.application.DeckService;
 import com.Thethirdtool.backend.Deck.domain.Deck;
 import com.Thethirdtool.backend.Deck.dto.response.DeckResponse;
@@ -68,6 +70,26 @@ public class DeckController {
         validateUser(userId, userDetails);
         deckService.unfreezeDeck(deckId);
         return ResponseEntity.ok(ApiResponse.ok("성공적으로 녹였습니다."));
+    }
+
+    @GetMapping("/{deckId}/cards/3day")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsFor3Day(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        List<Card> cards = deckService.getCardsFor3DayProject(deckId);
+        return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
+    }
+
+    @GetMapping("/{deckId}/cards/permanent")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsForPermanent(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        List<Card> cards = deckService.getArchivedCardsFromDeckTree(deckId);
+        return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
     }
 
 

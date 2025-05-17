@@ -155,6 +155,19 @@ public class Card extends AuditingField {
     }
 
 
+    // 카드 업데이트 관련 로직
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateDeck(Deck deck) {
+        this.deck = deck;
+    }
+
+    public void updateNote(Note note) {
+        this.note = note;
+    }
+
 
 
 

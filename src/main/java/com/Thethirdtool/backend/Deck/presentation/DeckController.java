@@ -2,6 +2,7 @@ package com.Thethirdtool.backend.Deck.presentation;
 
 
 import com.Thethirdtool.backend.Card.application.CardService;
+import com.Thethirdtool.backend.Card.dto.response.ApiResponse;
 import com.Thethirdtool.backend.Deck.application.DeckService;
 import com.Thethirdtool.backend.Deck.domain.Deck;
 import com.Thethirdtool.backend.Deck.dto.response.DeckResponse;
@@ -11,10 +12,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -37,5 +35,38 @@ public class DeckController {
         List<Deck> decks = deckService.getRootDecks();
         return ResponseEntity.ok(ApiResponse.ok(decks.stream().map(DeckResponse::from).toList()));
     }
+
+    //자식 덱 가져오기
+    @GetMapping("/{deckId}/children")
+    public ResponseEntity<ApiResponse<List<DeckResponse>>> getChildren(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        List<Deck> children = deckService.getImmediateChildren(deckId);
+        return ResponseEntity.ok(ApiResponse.ok(children.stream().map(DeckResponse::from).toList()));
+    }
+
+    @PatchMapping("/{deckId}/freeze")
+    public ResponseEntity<ApiResponse<String>> freezeDeck(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        deckService.freezeDeck(deckId);
+        return ResponseEntity.ok(ApiResponse.ok("성공적으로 얼렸습니다."));
+    }
+
+    @PatchMapping("/{deckId}/unfreeze")
+    public ResponseEntity<ApiResponse<String>> unfreezeDeck(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        deckService.unfreezeDeck(deckId);
+        return ResponseEntity.ok(ApiResponse.ok("성공적으로 녹였습니다."));
+    }
+
+
 
 }

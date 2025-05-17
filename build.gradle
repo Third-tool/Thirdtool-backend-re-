@@ -27,6 +27,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation platform("software.amazon.awssdk:bom:2.20.60") // BOM으로 버전 관리
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.686'
+
+
+
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'

@@ -7,7 +7,9 @@ import com.Thethirdtool.backend.Deck.application.DeckService;
 import com.Thethirdtool.backend.Deck.domain.Deck;
 import com.Thethirdtool.backend.Deck.dto.response.DeckResponse;
 import com.Thethirdtool.backend.Image.application.ImageService;
+import com.Thethirdtool.backend.common.validation.AuthValidationDto;
 import com.Thethirdtool.backend.security.CustomUserDetails;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,6 +68,17 @@ public class DeckController {
         validateUser(userId, userDetails);
         deckService.unfreezeDeck(deckId);
         return ResponseEntity.ok(ApiResponse.ok("성공적으로 녹였습니다."));
+    }
+
+
+
+    // ✅ 공통 인증 검증
+    private void validateUser(Long userId, CustomUserDetails userDetails) throws AccessDeniedException {
+        AuthValidationDto dto = new AuthValidationDto(userId, userDetails.getMember().getId());
+        Set<ConstraintViolation<AuthValidationDto>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            throw new AccessDeniedException(violations.iterator().next().getMessage());
+        }
     }
 
 

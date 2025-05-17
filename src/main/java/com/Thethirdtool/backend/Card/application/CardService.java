@@ -3,6 +3,7 @@ package com.Thethirdtool.backend.Card.application;
 
 import com.Thethirdtool.backend.Card.application.repository.CardRepository;
 import com.Thethirdtool.backend.Card.domain.Card;
+import com.Thethirdtool.backend.Card.domain.DuePeriod;
 import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehavior;
 import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehaviorFactory;
 import com.Thethirdtool.backend.Card.domain.StudyResult;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +108,36 @@ public class CardService {
                                   .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
         CardBehavior behavior = CardBehaviorFactory.from(card);
         behavior.resetDueGroup(card, selectedGroup);
+    }
+
+    //3day 프로젝트 중 3day,1week,2week 필터링 서비스
+    @Transactional
+    public List<Card> getCardsByDuePeriod(Long deckId, String period) {
+        Deck deck = deckRepository.findById(deckId)
+                                  .orElseThrow(() -> new EntityNotFoundException("덱이 존재하지 않습니다."));
+
+        DuePeriod range = DuePeriod.fromString(period);
+
+        return deck.getCards().stream()
+                   .filter(card -> card.isInDueRangeByCreatedAt(range.min(), range.max()))
+                   .sorted(Comparator.comparing(Card::getDueDate))
+                   .toList();
+    }
+    //리포지토리에서 덱들 중 3day에 해당하는 archived가 False인 값인 카드들을 가져온다.
+    public List<Card> getCardsFor3DayProject(Long deckId) {
+        return cardRepository.findByDeckIdAndIsArchivedFalseAndIntervalDaysLessThanEqual(deckId, 30);
+    }
+    //리포지토리에서 덱들 중 permanent에 해당하는 archived가 True인 값들만 가져온다.
+    public List<Card> getCardsForPermanentProject(Long deckId) {
+        return cardRepository.findByDeckIdAndIsArchivedTrue(deckId);
+    }
+
+    //preview 데이터 보내기 - 며칠 남았는지
+    public Map<String, String> getStudyPreview(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                                  .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+        CardBehavior behavior = CardBehaviorFactory.from(card);
+        return behavior.previewIntervals(card);
     }
 
 

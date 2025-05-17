@@ -3,22 +3,28 @@ package com.Thethirdtool.backend.Deck.presentation;
 
 import com.Thethirdtool.backend.Card.application.CardService;
 import com.Thethirdtool.backend.Card.domain.Card;
+import com.Thethirdtool.backend.Card.dto.request.CardCreateRequest;
 import com.Thethirdtool.backend.Card.dto.response.ApiResponse;
 import com.Thethirdtool.backend.Card.dto.response.CardResponse;
 import com.Thethirdtool.backend.Deck.application.DeckService;
 import com.Thethirdtool.backend.Deck.domain.Deck;
+import com.Thethirdtool.backend.Deck.dto.request.DeckCreateRequest;
 import com.Thethirdtool.backend.Deck.dto.response.DeckResponse;
 import com.Thethirdtool.backend.Image.application.ImageService;
 import com.Thethirdtool.backend.common.validation.AuthValidationDto;
 import com.Thethirdtool.backend.security.CustomUserDetails;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -90,6 +96,49 @@ public class DeckController {
         validateUser(userId, userDetails);
         List<Card> cards = deckService.getArchivedCardsFromDeckTree(deckId);
         return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
+    }
+
+    @GetMapping("/{deckId}/cards/due")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getDueCardsByPeriod(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @RequestParam String period,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        List<Card> cards = cardService.getCardsByDuePeriod(deckId, period);
+        return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
+    }
+
+    @PostMapping("/{parentId}/children")
+    public ResponseEntity<ApiResponse<DeckResponse>> createChildDeck(
+            @PathVariable Long userId,
+            @PathVariable Long parentId,
+            @RequestBody @Valid DeckCreateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+        validateUser(userId, userDetails);
+        Deck child = deckService.createChildDeck(parentId, request.name());
+        return ResponseEntity.ok(ApiResponse.ok(DeckResponse.from(child)));
+    }
+
+    @PostMapping(value = "/{deckId}/cards", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<CardResponse>> createCard(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @RequestPart("data") @Valid CardCreateRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException, AccessDeniedException {
+        validateUser(userId, userDetails);
+
+        List<String> imageUrls = new ArrayList<>();
+        if (images != null) {
+            for (MultipartFile image : images) {
+                String url = imageService.imageUpload(image);
+                imageUrls.add(url);
+            }
+        }
+
+        Card card = cardService.createCard(deckId, request.noteId(), request, imageUrls);
+        return ResponseEntity.ok(ApiResponse.ok(CardResponse.from(card)));
     }
 
 

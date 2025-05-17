@@ -30,6 +30,20 @@ public class DeckService {
     }
 
 
+    // ✅ isFrozen = false인 덱의 카드만 가져오기 (3day용)
+    public List<Card> getCardsFor3DayProject(Long deckId) {
+        Deck deck = deckRepository.findById(deckId)
+                                  .orElseThrow(() -> new EntityNotFoundException("덱을 찾을 수 없습니다."));
+
+        // 얼린 덱이면 빈 리스트 반환
+        if (deck.isFrozen()) {
+            return List.of();
+        }
+
+        return cardRepository.findByDeckIdAndIsArchivedFalseAndIntervalDaysLessThanEqual(deckId, 30);
+    }
+
+
     // ✅ 영구 프로젝트용 카드 조회: 하위 덱 중 얼리지 않은 것만 순회
     public List<Card> getArchivedCardsFromDeckTree(Long rootDeckId) {
         Deck root = deckRepository.findById(rootDeckId)
@@ -46,6 +60,52 @@ public class DeckService {
 
         return result;
     }
+
+
+    /**
+     * 덱의 직접적인 children 덱 리스트만 반환 (➕ 버튼 클릭 시)
+     */
+    public List<Deck> getImmediateChildren(Long deckId) {
+        Deck parent = deckRepository.findById(deckId)
+                                    .orElseThrow(() -> new EntityNotFoundException("해당 덱을 찾을 수 없습니다."));
+
+        return parent.getChildren()
+                     .stream()
+                     .filter(child -> !child.isFrozen()) // 얼리지 않은 것만
+                     .toList();
+    }
+
+
+    @Transactional
+    public void freezeDeck(Long deckId) {
+        Deck deck = deckRepository.findById(deckId)
+                                  .orElseThrow(() -> new IllegalArgumentException("Deck not found"));
+        deck.freeze();
+    }
+
+    @Transactional
+    public void unfreezeDeck(Long deckId) {
+        Deck deck = deckRepository.findById(deckId)
+                                  .orElseThrow(() -> new IllegalArgumentException("Deck not found"));
+        deck.unfreeze();
+    }
+
+
+    //하위 덱 만들기
+    @Transactional
+    public Deck createChildDeck(Long parentId, String name) {
+        Deck parent = deckRepository.findById(parentId)
+                                    .orElseThrow(() -> new EntityNotFoundException("부모 덱이 존재하지 않습니다."));
+
+        Deck child = Deck.builder()
+                         .name(name)
+                         .parent(parent)
+                         .isFrozen(false)
+                         .build();
+
+        return deckRepository.save(child);
+    }
+
 
 
 

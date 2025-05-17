@@ -7,6 +7,7 @@ import com.Thethirdtool.backend.Card.domain.DuePeriod;
 import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehavior;
 import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehaviorFactory;
 import com.Thethirdtool.backend.Card.domain.StudyResult;
+import com.Thethirdtool.backend.Card.dto.CardStudyViewDto;
 import com.Thethirdtool.backend.Card.dto.request.CardCreateRequest;
 import com.Thethirdtool.backend.Card.dto.request.CardUpdateRequest;
 import com.Thethirdtool.backend.Deck.application.repository.DeckRepository;
@@ -32,6 +33,14 @@ public class CardService {
     private final DeckRepository deckRepository;
     private final NoteRepository noteRepository;
 
+
+    //카드 단건 조회- 스크롤링 방식- 근데 할 일이 없을거 같음
+    @Transactional(readOnly = true)
+    public CardStudyViewDto getCardStudyView(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                                  .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+        return CardStudyViewDto.from(card);
+    }
 
 
     // ✅ 카드 생성

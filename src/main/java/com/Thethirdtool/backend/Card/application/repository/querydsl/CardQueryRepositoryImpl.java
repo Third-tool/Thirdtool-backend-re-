@@ -1,4 +1,4 @@
-package com.Thethirdtool.backend.Card.application.repository;
+package com.Thethirdtool.backend.Card.application.repository.querydsl;
 
 import com.Thethirdtool.backend.Card.domain.Card;
 import com.Thethirdtool.backend.Card.domain.QCard;

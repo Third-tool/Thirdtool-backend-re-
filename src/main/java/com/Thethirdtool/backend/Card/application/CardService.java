@@ -3,6 +3,11 @@ package com.Thethirdtool.backend.Card.application;
 
 import com.Thethirdtool.backend.Card.application.repository.CardRepository;
 import com.Thethirdtool.backend.Card.domain.Card;
+import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehavior;
+import com.Thethirdtool.backend.Card.domain.StudyPolicy.CardBehaviorFactory;
+import com.Thethirdtool.backend.Card.domain.StudyResult;
+import com.Thethirdtool.backend.Card.dto.request.CardCreateRequest;
+import com.Thethirdtool.backend.Card.dto.request.CardUpdateRequest;
 import com.Thethirdtool.backend.Deck.application.repository.DeckRepository;
 import com.Thethirdtool.backend.Deck.domain.Deck;
 import com.Thethirdtool.backend.Note.application.repository.NoteRepository;
@@ -59,6 +64,49 @@ public class CardService {
         }
         cardRepository.deleteById(cardId);
     }
+
+    //수정하기
+    @Transactional
+    public Card updateCard(Long cardId, CardUpdateRequest request) {
+        Card card = cardRepository.findById(cardId)
+                                  .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+
+        if (request.deckId() != null) {
+            Deck deck = deckRepository.findById(request.deckId())
+                                      .orElseThrow(() -> new EntityNotFoundException("덱이 존재하지 않습니다."));
+            card.updateDeck(deck);
+        }
+
+        if (request.noteId() != null) {
+            Note note = noteRepository.findById(request.noteId())
+                                      .orElseThrow(() -> new EntityNotFoundException("노트를 찾을 수 없습니다."));
+            card.updateNote(note);
+        }
+
+        if (request.content() != null && !request.content().isBlank()) {
+            card.updateContent(request.content());
+        }
+
+        return card;
+    }
+    //CardBehavior로 ->> 3day 중에서 선택하게 만들었다.
+    @Transactional
+    public void processStudyResult(Long cardId, StudyResult result) {
+        Card card = cardRepository.findById(cardId)
+                                  .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+        CardBehavior behavior = CardBehaviorFactory.from(card);
+        behavior.processStudyResult(card, result);
+    }
+
+    // 3day 일 경우 -> stay, 3day, 1week, 2week 중 고르게한다.
+    @Transactional
+    public void processDueGroupSelection(Long cardId, String selectedGroup) {
+        Card card = cardRepository.findById(cardId)
+                                  .orElseThrow(() -> new EntityNotFoundException("카드를 찾을 수 없습니다."));
+        CardBehavior behavior = CardBehaviorFactory.from(card);
+        behavior.resetDueGroup(card, selectedGroup);
+    }
+
 
 
 

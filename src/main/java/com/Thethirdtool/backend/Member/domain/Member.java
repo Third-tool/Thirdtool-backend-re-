@@ -9,7 +9,6 @@ import java.util.List;
 
 
 @Builder
-@RequiredArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity

@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@RequiredArgsConstructor
 @Builder
 @Entity
 public class Card extends AuditingField {

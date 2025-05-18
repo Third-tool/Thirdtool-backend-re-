@@ -14,9 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor // Builder를 위해 필요
+@RequiredArgsConstructor // Builder를 위해 필요
 @Transactional
-@RequiredArgsConstructor
 @Service
 public class DeckService {
     private final DeckRepository deckRepository;

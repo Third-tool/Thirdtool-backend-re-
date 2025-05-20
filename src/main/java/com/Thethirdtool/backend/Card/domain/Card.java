@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@RequiredArgsConstructor
 @Builder
 @Entity
 public class Card extends AuditingField {
@@ -51,6 +50,7 @@ public class Card extends AuditingField {
     private DuePeriod duePeriod;
 
     //카드 썸네일 관련 태그
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "card_tags", joinColumns = @JoinColumn(name = "card_id"))
     @Column(name = "tag")

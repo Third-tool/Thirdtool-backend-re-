@@ -12,16 +12,17 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Deck {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
     private List<Card> cards = new ArrayList<>();
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isFrozen = false;
 
@@ -31,6 +32,7 @@ public class Deck {
     @JoinColumn(name = "parent_id")
     private Deck parent;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Deck> children = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package com.Thethirdtool.backend.common.annotation;
 
+import com.Thethirdtool.backend.common.validation.AuthenticatedUserMatchValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

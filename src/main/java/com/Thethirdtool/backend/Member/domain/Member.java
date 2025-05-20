@@ -9,7 +9,6 @@ import java.util.List;
 
 
 @Builder
-@RequiredArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -29,6 +28,7 @@ public class Member {
     private String email;
 
     // 덱 연관관계 (옵션)
+    @Builder.Default
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Deck> decks = new ArrayList<>();
 

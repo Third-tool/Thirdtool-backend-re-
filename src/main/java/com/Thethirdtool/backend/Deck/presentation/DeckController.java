@@ -12,7 +12,7 @@ import com.Thethirdtool.backend.Deck.dto.request.DeckCreateRequest;
 import com.Thethirdtool.backend.Deck.dto.response.DeckResponse;
 import com.Thethirdtool.backend.Image.application.ImageService;
 import com.Thethirdtool.backend.common.validation.AuthValidationDto;
-import com.Thethirdtool.backend.security.CustomUserDetails;
+import com.Thethirdtool.backend.security.CustomOAuth2User;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
@@ -41,7 +41,7 @@ public class DeckController {
     @GetMapping("/roots")
     public ResponseEntity<ApiResponse<List<DeckResponse>>> getRootDecks(
             @PathVariable Long userId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         List<Deck> decks = deckService.getRootDecks();
         return ResponseEntity.ok(ApiResponse.ok(decks.stream().map(DeckResponse::from).toList()));
@@ -52,7 +52,7 @@ public class DeckController {
     public ResponseEntity<ApiResponse<List<DeckResponse>>> getChildren(
             @PathVariable Long userId,
             @PathVariable Long deckId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         List<Deck> children = deckService.getImmediateChildren(deckId);
         return ResponseEntity.ok(ApiResponse.ok(children.stream().map(DeckResponse::from).toList()));
@@ -62,7 +62,7 @@ public class DeckController {
     public ResponseEntity<ApiResponse<String>> freezeDeck(
             @PathVariable Long userId,
             @PathVariable Long deckId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         deckService.freezeDeck(deckId);
         return ResponseEntity.ok(ApiResponse.ok("성공적으로 얼렸습니다."));
@@ -72,7 +72,7 @@ public class DeckController {
     public ResponseEntity<ApiResponse<String>> unfreezeDeck(
             @PathVariable Long userId,
             @PathVariable Long deckId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         deckService.unfreezeDeck(deckId);
         return ResponseEntity.ok(ApiResponse.ok("성공적으로 녹였습니다."));
@@ -82,7 +82,7 @@ public class DeckController {
     public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsFor3Day(
             @PathVariable Long userId,
             @PathVariable Long deckId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         List<Card> cards = deckService.getCardsFor3DayProject(deckId);
         return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
@@ -92,7 +92,7 @@ public class DeckController {
     public ResponseEntity<ApiResponse<List<CardResponse>>> getCardsForPermanent(
             @PathVariable Long userId,
             @PathVariable Long deckId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         List<Card> cards = deckService.getArchivedCardsFromDeckTree(deckId);
         return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
@@ -103,7 +103,7 @@ public class DeckController {
             @PathVariable Long userId,
             @PathVariable Long deckId,
             @RequestParam String period,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         List<Card> cards = cardService.getCardsByDuePeriod(deckId, period);
         return ResponseEntity.ok(ApiResponse.ok(cards.stream().map(CardResponse::from).toList()));
@@ -114,7 +114,7 @@ public class DeckController {
             @PathVariable Long userId,
             @PathVariable Long parentId,
             @RequestBody @Valid DeckCreateRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws AccessDeniedException {
         validateUser(userId, userDetails);
         Deck child = deckService.createChildDeck(parentId, request.name());
         return ResponseEntity.ok(ApiResponse.ok(DeckResponse.from(child)));
@@ -126,7 +126,7 @@ public class DeckController {
             @PathVariable Long deckId,
             @RequestPart("data") @Valid CardCreateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException, AccessDeniedException {
+            @AuthenticationPrincipal CustomOAuth2User userDetails) throws IOException, AccessDeniedException {
         validateUser(userId, userDetails);
 
         List<String> imageUrls = new ArrayList<>();
@@ -144,7 +144,7 @@ public class DeckController {
 
 
     // ✅ 공통 인증 검증
-    private void validateUser(Long userId, CustomUserDetails userDetails) throws AccessDeniedException {
+    private void validateUser(Long userId, CustomOAuth2User userDetails) throws AccessDeniedException {
         AuthValidationDto dto = new AuthValidationDto(userId, userDetails.getMember().getId());
         Set<ConstraintViolation<AuthValidationDto>> violations = validator.validate(dto);
         if (!violations.isEmpty()) {

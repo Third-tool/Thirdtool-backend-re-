@@ -11,7 +11,6 @@ import java.time.Instant;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class Note {
 
     @Id
@@ -27,4 +26,21 @@ public class Note {
     private Instant mtime;
 
     private int usn;
+
+    @Builder
+    private Note(String question, String answer, Instant mtime, int usn) {
+        this.question = question;
+        this.answer = answer;
+        this.mtime = mtime;
+        this.usn = usn;
+    }
+
+    public static Note of(String question, String answer, Instant mtime, int usn) {
+        return Note.builder()
+                   .question(question)
+                   .answer(answer)
+                   .mtime(mtime)
+                   .usn(usn)
+                   .build();
+    }
 }

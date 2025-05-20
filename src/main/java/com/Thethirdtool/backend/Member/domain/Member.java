@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Member {
 
@@ -27,11 +26,22 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
-    // 덱 연관관계 (옵션)
-    @Builder.Default
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Deck> decks = new ArrayList<>();
 
+    @Builder
+    private Member(String kakaoId, String nickname, String email) {
+        this.kakaoId = kakaoId;
+        this.nickname = nickname;
+        this.email = email;
+        this.decks = new ArrayList<>();
+    }
 
-
+    public static Member of(String kakaoId, String nickname, String email) {
+        return Member.builder()
+                     .kakaoId(kakaoId)
+                     .nickname(nickname)
+                     .email(email)
+                     .build();
+    }
 }

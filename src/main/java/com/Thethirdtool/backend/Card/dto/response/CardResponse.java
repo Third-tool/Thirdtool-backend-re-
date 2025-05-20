@@ -11,8 +11,7 @@ public record CardResponse(
         int successCount,
         int reps,
         int easeFactor,
-        int lapses,
-        String imageUrl // ✅ 추가된 필드
+        int lapses
 ) {
     public static CardResponse from(Card card) {
         return new CardResponse(
@@ -24,8 +23,7 @@ public record CardResponse(
                 card.getSuccessCount(),
                 card.getReps(),
                 card.getEaseFactor(),
-                card.getLapses(),
-                card.getImageUrl() // ✅ 추가된 값
+                card.getLapses()
         );
     }
 }

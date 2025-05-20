@@ -1,5 +1,6 @@
 package com.Thethirdtool.backend.Deck.dto.response;
 
+
 import com.Thethirdtool.backend.Deck.domain.Deck;
 import lombok.Builder;
 import lombok.Getter;

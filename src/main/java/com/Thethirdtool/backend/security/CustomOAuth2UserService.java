@@ -3,13 +3,17 @@ package com.Thethirdtool.backend.security;
 import com.Thethirdtool.backend.Member.domain.Member;
 import com.Thethirdtool.backend.Member.presentation.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -19,7 +23,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final MemberRepository memberRepository;
 
     @Override
-    public CustomUserDetails loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = new DefaultOAuth2UserService().loadUser(userRequest);
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -28,12 +32,22 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String kakaoId = attributes.get("id").toString();
         String nickname = (String) profile.get("nickname");
-        //얘는 아마 없을걸?? 오류 예상
-        String email = (String) kakaoAccount.get("email");
+        String email = (String) kakaoAccount.get("email"); // null일 수 있음
 
+        // 회원 저장 또는 조회
         Member member = memberRepository.findByKakaoId(kakaoId)
-                                        .orElseGet(() -> memberRepository.save(new Member(kakaoId, nickname, email)));
+                                        .orElseGet(() -> memberRepository.save(
+                                                Member.of(kakaoId, nickname, email)
+                                                                              ));
 
-        return new CustomUserDetails(member); // 세션에 저장됨
+        // 권한 부여
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+        // 반환: DefaultOAuth2User 사용
+        return new DefaultOAuth2User(
+                authorities,
+                attributes,
+                "id" // 고유 식별자로 사용할 키 (attributes에서 가져올 이름)
+        );
     }
 }

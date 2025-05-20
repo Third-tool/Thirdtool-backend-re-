@@ -39,6 +39,8 @@ public class QCard extends EntityPathBase<Card> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final ListPath<String, StringPath> imageUrls = this.<String, StringPath>createList("imageUrls", String.class, StringPath.class, PathInits.DIRECT2);
+
     public final NumberPath<Integer> intervalDays = createNumber("intervalDays", Integer.class);
 
     public final BooleanPath isArchived = createBoolean("isArchived");

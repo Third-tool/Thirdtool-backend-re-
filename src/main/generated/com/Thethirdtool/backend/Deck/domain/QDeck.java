@@ -32,6 +32,8 @@ public class QDeck extends EntityPathBase<Deck> {
 
     public final StringPath name = createString("name");
 
+    public final com.Thethirdtool.backend.Member.domain.QMember owner;
+
     public final QDeck parent;
 
     public QDeck(String variable) {
@@ -52,6 +54,7 @@ public class QDeck extends EntityPathBase<Deck> {
 
     public QDeck(Class<? extends Deck> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.owner = inits.isInitialized("owner") ? new com.Thethirdtool.backend.Member.domain.QMember(forProperty("owner")) : null;
         this.parent = inits.isInitialized("parent") ? new QDeck(forProperty("parent"), inits.get("parent")) : null;
     }
 

@@ -5,9 +5,7 @@ import com.Thethirdtool.backend.Deck.domain.Deck;
 import com.Thethirdtool.backend.Note.domain.Note;
 import com.Thethirdtool.backend.common.jpa.AuditingField;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Card extends AuditingField {
 
@@ -37,6 +35,14 @@ public class Card extends AuditingField {
     @Column(name = "due_date")
     private Instant dueDate;
 
+    //이미지 url 저장 공간
+    @ElementCollection
+    @Setter
+    @CollectionTable(name = "card_images", joinColumns = @JoinColumn(name = "card_id"))
+    @Column(name = "image_url")
+    private List<String> imageUrls = new ArrayList<>();
+
+
     private int intervalDays; //다음 복습까지 간격을 알려주는데 사용
     private boolean isArchived;
     private int successCount;
@@ -50,13 +56,61 @@ public class Card extends AuditingField {
     private DuePeriod duePeriod;
 
     //카드 썸네일 관련 태그
-    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "card_tags", joinColumns = @JoinColumn(name = "card_id"))
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
 
+    // ====== 빌더 패턴======
+    @Builder
+    public Card(Deck deck,
+                Note note,
+                String content,
+                List<String> tags,
+                Instant dueDate,
+                int intervalDays,
+                int easeFactor,
+                int successCount,
+                int reps,
+                int lapses) {
+        this.deck = deck;
+        this.note = note;
+        this.content = content;
+        this.tags = tags;
+        this.dueDate = dueDate;
+        this.intervalDays = intervalDays;
+        this.easeFactor = easeFactor;
+        this.successCount = successCount;
+        this.reps = reps;
+        this.lapses = lapses;
+
+        this.imageUrls = new ArrayList<>(); // 기본값으로 초기화
+    }
+
+    public static Card of(Deck deck,
+                          Note note,
+                          String content,
+                          List<String> tags,
+                          Instant dueDate,
+                          int intervalDays,
+                          int easeFactor,
+                          int successCount,
+                          int reps,
+                          int lapses) {
+        return Card.builder()
+                   .deck(deck)
+                   .note(note)
+                   .content(content)
+                   .tags(tags)
+                   .dueDate(dueDate)
+                   .intervalDays(intervalDays)
+                   .easeFactor(easeFactor)
+                   .successCount(successCount)
+                   .reps(reps)
+                   .lapses(lapses)
+                   .build();
+    }
     // ====== 학습 로직 ======
 
     public void archive() {
